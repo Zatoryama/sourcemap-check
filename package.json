@@ -1,0 +1,56 @@
+{
+	"name": "publishguard",
+	"version": "0.1.0",
+	"description": "Pre-publish tarball validator for npm packages. Catches leaked secrets, bloat, and misconfigured exports before they hit the registry.",
+	"type": "module",
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"bin": {
+		"publishguard": "./dist/cli.js"
+	},
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js"
+		}
+	},
+	"files": ["dist"],
+	"scripts": {
+		"build": "tsc",
+		"dev": "tsc --watch",
+		"test": "vitest run",
+		"test:watch": "vitest",
+		"lint": "biome check .",
+		"lint:fix": "biome check --write .",
+		"typecheck": "tsc --noEmit",
+		"prepublishOnly": "npm run build"
+	},
+	"keywords": [
+		"npm",
+		"publish",
+		"guard",
+		"validator",
+		"tarball",
+		"security",
+		"secrets",
+		"lint",
+		"ci",
+		"pre-publish"
+	],
+	"author": "",
+	"license": "MIT",
+	"engines": {
+		"node": ">=20"
+	},
+	"dependencies": {
+		"commander": "^13.0.0",
+		"picocolors": "^1.1.0",
+		"tar": "^7.4.0"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^1.9.0",
+		"@types/node": "^22.0.0",
+		"typescript": "^5.7.0",
+		"vitest": "^3.0.0"
+	}
+}
