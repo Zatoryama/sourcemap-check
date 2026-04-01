@@ -1,11 +1,11 @@
 # sourcemap-check
 
-Checks npm packages for source maps that expose your original source code. One job, zero config, CI-ready.
+Checks npm packages for source maps that expose your source code. Zero config, CI-ready.
 
 ```
 sourcemap-check v0.1.0 — checking my-package@1.0.0
 
-FAIL Found 3 source map file(s) exposing original source code:
+FAIL Found 3 source map file(s) exposing source code:
 
   dist/index.js.map
   dist/utils.js.map
@@ -14,9 +14,7 @@ FAIL Found 3 source map file(s) exposing original source code:
 
 ## Why
 
-Source maps (`.js.map`, `.css.map`) contain mappings back to your original source code — variable names, comments, file structure, and often the full source text via `sourcesContent`. When you publish an npm package with source maps, anyone who installs it gets access to your unminified code.
-
-No existing npm publishing tool checks for this. `publint` validates exports. `arethetypeswrong` checks types. `gitleaks` catches secrets. **Nobody catches source maps.** sourcemap-check fills that gap.
+Source maps (`.js.map`, `.css.map`) contain mappings back to your source code — variable names, comments, file structure, and often the full source text via `sourcesContent`. When you publish an npm package with source maps, anyone who installs it gets access to your unminified code.
 
 ## Install
 
@@ -101,7 +99,7 @@ if (sourceMaps.length > 0) {
 
 File extensions: `.js.map`, `.css.map`, `.mjs.map`, `.cjs.map`
 
-That's it. One job, done well.
+That's it.
 
 ## Requirements
 

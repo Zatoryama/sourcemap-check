@@ -1,7 +1,7 @@
 {
 	"name": "sourcemap-check",
 	"version": "0.1.0",
-	"description": "Checks npm packages for source maps that expose original source code. One job, zero config, CI-ready.",
+	"description": "Checks npm packages for source maps that expose source code. Zero config, CI-ready.",
 	"type": "module",
 	"main": "./dist/index.js",
 	"types": "./dist/index.d.ts",

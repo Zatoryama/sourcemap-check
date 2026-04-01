@@ -23,7 +23,7 @@ if (args.includes("--version") || args.includes("-v")) {
 if (args.includes("--help") || args.includes("-h")) {
 	process.stdout.write(`sourcemap-check v${VERSION}
 
-Check npm packages for source maps that expose original source code.
+Check npm packages for source maps that expose source code.
 
 Usage:
   sourcemap-check [options] [tarball]
@@ -81,7 +81,7 @@ async function run(): Promise<void> {
 				process.stdout.write(`${pc.green(pc.bold("PASS"))} No source maps found.\n`);
 			} else {
 				process.stdout.write(
-					`${pc.red(pc.bold("FAIL"))} Found ${sourceMaps.length} source map file(s) exposing original source code:\n\n`,
+					`${pc.red(pc.bold("FAIL"))} Found ${sourceMaps.length} source map file(s) exposing source code:\n\n`,
 				);
 				for (const file of sourceMaps) {
 					process.stdout.write(`  ${pc.dim(file)}\n`);
