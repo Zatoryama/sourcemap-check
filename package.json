@@ -26,8 +26,16 @@
 		"prepublishOnly": "npm run build"
 	},
 	"keywords": ["npm", "sourcemap", "source-map", "security", "ci", "publish", "tarball"],
-	"author": "",
+	"author": "Zatoryama",
 	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/Zatoryama/sourcemap-check.git"
+	},
+	"homepage": "https://github.com/Zatoryama/sourcemap-check#readme",
+	"bugs": {
+		"url": "https://github.com/Zatoryama/sourcemap-check/issues"
+	},
 	"engines": {
 		"node": ">=20"
 	},

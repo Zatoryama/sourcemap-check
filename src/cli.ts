@@ -1,13 +1,46 @@
 #!/usr/bin/env node
 
+import { readFileSync } from "node:fs";
 import { unlink } from "node:fs/promises";
+import { fileURLToPath } from "node:url";
+import { dirname, join } from "node:path";
 import pc from "picocolors";
 import { packProject } from "./core/packer.js";
 import { readTarball } from "./core/tarball.js";
 import { findSourceMaps } from "./rules/no-exposed-source.js";
 
-const VERSION = "0.1.0";
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const pkg = JSON.parse(readFileSync(join(__dirname, "..", "package.json"), "utf-8"));
+const VERSION: string = pkg.version;
+
 const args = process.argv.slice(2);
+
+if (args.includes("--version") || args.includes("-v")) {
+	process.stdout.write(`sourcemap-check v${VERSION}\n`);
+	process.exit(0);
+}
+
+if (args.includes("--help") || args.includes("-h")) {
+	process.stdout.write(`sourcemap-check v${VERSION}
+
+Check npm packages for source maps that expose original source code.
+
+Usage:
+  sourcemap-check [options] [tarball]
+
+Options:
+  --json       Output results as JSON
+  --help, -h   Show this help message
+  --version, -v  Show version number
+
+Examples:
+  sourcemap-check              Check current project
+  sourcemap-check ./pkg.tgz   Check an existing tarball
+  sourcemap-check --json       JSON output for CI
+`);
+	process.exit(0);
+}
+
 const jsonMode = args.includes("--json");
 const tarballArg = args.find((a) => !a.startsWith("--"));
 

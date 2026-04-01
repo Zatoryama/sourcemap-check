@@ -18,7 +18,7 @@ export async function createFixtureTarball(
 	files: FixtureFile[],
 	manifest?: Record<string, unknown>,
 ): Promise<string> {
-	const tempDir = mkdtempSync(join(tmpdir(), "publishguard-test-"));
+	const tempDir = mkdtempSync(join(tmpdir(), "sourcemap-check-test-"));
 	tempDirs.push(tempDir);
 
 	const packageDir = join(tempDir, "package");
