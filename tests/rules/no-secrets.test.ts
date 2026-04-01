@@ -77,6 +77,21 @@ describe("no-secrets rule", () => {
 		expect(flaggedFiles).toContain("src/auth.ts");
 	});
 
+	it("does NOT flag .env.example, .env.sample, .env.template", async () => {
+		const tgz = await createFixtureTarball([
+			{ path: ".env.example", content: "API_KEY=your-key-here" },
+			{ path: ".env.sample", content: "DB_URL=your-db-url" },
+			{ path: ".env.template", content: "SECRET=replace-me" },
+		]);
+		const contents = await readTarball(tgz);
+		const results = rule.run(contents);
+
+		const flaggedFiles = results.flatMap((r) => r.files ?? []);
+		expect(flaggedFiles).not.toContain(".env.example");
+		expect(flaggedFiles).not.toContain(".env.sample");
+		expect(flaggedFiles).not.toContain(".env.template");
+	});
+
 	it("does NOT flag normal source files", async () => {
 		const tgz = await createFixtureTarball([
 			{ path: "src/index.ts", content: "export const hello = 'world';" },

@@ -1,6 +1,7 @@
 import type { TarballContents } from "../core/tarball.js";
 import noConfig from "./no-config.js";
 import noDocs from "./no-docs.js";
+import noDuplicates from "./no-duplicates.js";
 import noSecrets from "./no-secrets.js";
 import noSourcemaps from "./no-sourcemaps.js";
 import noTests from "./no-tests.js";
@@ -9,7 +10,16 @@ import sizeLimit from "./size-limit.js";
 import type { Rule, RuleResult } from "./types.js";
 
 export function getDefaultRules(): Rule[] {
-	return [noSecrets, noSourcemaps, noTests, noDocs, noConfig, sizeLimit, requiredFiles];
+	return [
+		noSecrets,
+		noSourcemaps,
+		noTests,
+		noDocs,
+		noConfig,
+		noDuplicates,
+		sizeLimit,
+		requiredFiles,
+	];
 }
 
 export function runRules(contents: TarballContents, rules: Rule[]): RuleResult[] {

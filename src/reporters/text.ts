@@ -57,7 +57,9 @@ export function formatTextReport(
 				? ("warn" as const)
 				: ("info" as const);
 
-		lines.push(`${severityTag(worstSeverity)} ${ruleName}`);
+		const totalFiles = ruleResults.reduce((sum, r) => sum + (r.files?.length ?? 0), 0);
+		const countSuffix = totalFiles > 0 ? pc.dim(` (${totalFiles} files)`) : "";
+		lines.push(`${severityTag(worstSeverity)} ${ruleName}${countSuffix}`);
 
 		for (const r of ruleResults) {
 			lines.push(`       ${r.message}`);

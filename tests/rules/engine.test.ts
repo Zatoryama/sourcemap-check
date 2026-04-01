@@ -9,9 +9,9 @@ afterAll(() => {
 
 describe("engine", () => {
 	describe("getDefaultRules", () => {
-		it("returns 7 rules", () => {
+		it("returns 8 rules", () => {
 			const rules = getDefaultRules();
-			expect(rules).toHaveLength(7);
+			expect(rules).toHaveLength(8);
 		});
 
 		it("each rule has required properties", () => {

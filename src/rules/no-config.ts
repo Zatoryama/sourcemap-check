@@ -28,7 +28,7 @@ const CONFIG_BASENAME_PREFIXES = [
 ];
 
 function isDevConfig(filePath: string): boolean {
-	// Check directory prefixes
+	// Check directory prefixes (these are always dev-only, regardless of nesting)
 	for (const prefix of CONFIG_DIR_PREFIXES) {
 		if (filePath.startsWith(prefix) || filePath.includes(`/${prefix}`)) {
 			return true;
@@ -36,6 +36,12 @@ function isDevConfig(filePath: string): boolean {
 	}
 
 	const basename = filePath.split("/").pop() ?? "";
+
+	// Skip template files — these generate configs for other projects, not dev configs
+	if (basename.includes("template")) return false;
+
+	// Skip config-like files nested inside src/ or dist/ — they're likely code, not dev configs
+	if (filePath.startsWith("src/") || filePath.startsWith("dist/")) return false;
 
 	// Check exact file matches
 	for (const file of CONFIG_EXACT_FILES) {

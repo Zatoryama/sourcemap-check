@@ -18,8 +18,13 @@ const CONTENT_PATTERNS: RegExp[] = [
 function isSensitiveFilename(filePath: string): boolean {
 	const basename = filePath.split("/").pop() ?? "";
 
-	// Exact match or .env.* pattern
-	if (basename === ".env" || basename.startsWith(".env.")) return true;
+	// Exact match or .env.* pattern (but not .env.example, .env.sample, .env.template)
+	const ENV_SAFE_SUFFIXES = [".example", ".sample", ".template"];
+	if (basename === ".env") return true;
+	if (basename.startsWith(".env.")) {
+		const suffix = basename.slice(4);
+		if (!ENV_SAFE_SUFFIXES.includes(suffix)) return true;
+	}
 
 	for (const pattern of SENSITIVE_FILE_PATTERNS) {
 		if (basename === pattern) return true;

@@ -35,6 +35,28 @@ describe("no-config rule", () => {
 		expect(results[0].files).toContain(".vscode/settings.json");
 	});
 
+	it("does NOT flag template files like tsconfig.template.ts", async () => {
+		const tgz = await createFixtureTarball([
+			{ path: "dist/templates/tsconfig.template.js", content: "module.exports = {}" },
+			{ path: "src/templates/tsconfig.template.ts", content: "export default {}" },
+		]);
+		const contents = await readTarball(tgz);
+		const results = rule.run(contents);
+
+		expect(results).toHaveLength(0);
+	});
+
+	it("does NOT flag config-like files nested in src/ or dist/", async () => {
+		const tgz = await createFixtureTarball([
+			{ path: "src/generators/tsconfig.json", content: "{}" },
+			{ path: "dist/factories/biome.json", content: "{}" },
+		]);
+		const contents = await readTarball(tgz);
+		const results = rule.run(contents);
+
+		expect(results).toHaveLength(0);
+	});
+
 	it("does NOT flag src/config.ts", async () => {
 		const tgz = await createFixtureTarball([
 			{ path: "src/config.ts", content: "export const config = {};" },
