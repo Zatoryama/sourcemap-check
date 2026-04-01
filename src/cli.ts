@@ -1,108 +1,83 @@
 #!/usr/bin/env node
 
 import { unlink } from "node:fs/promises";
-import { Command } from "commander";
+import pc from "picocolors";
 import { packProject } from "./core/packer.js";
 import { readTarball } from "./core/tarball.js";
-import { formatJsonReport } from "./reporters/json.js";
-import { formatTextReport } from "./reporters/text.js";
-import { getDefaultRules, getExitCode, runRules } from "./rules/engine.js";
-import type { Rule } from "./rules/types.js";
+import { findSourceMaps } from "./rules/no-exposed-source.js";
 
 const VERSION = "0.1.0";
+const args = process.argv.slice(2);
+const jsonMode = args.includes("--json");
+const tarballArg = args.find((a) => !a.startsWith("--"));
 
-interface CliOptions {
-	json?: boolean;
-	ignore?: string;
-	maxSize?: string;
-}
+async function run(): Promise<void> {
+	let tgzPath: string;
+	let cleanup = false;
 
-function filterRules(rules: Rule[], ignore: string | undefined): Rule[] {
-	if (!ignore) return rules;
-
-	const ignored = new Set(ignore.split(",").map((s) => s.trim()));
-	return rules.filter((r) => !ignored.has(r.name));
-}
-
-async function runCheck(tgzPath: string, options: CliOptions): Promise<number> {
-	const contents = await readTarball(tgzPath);
-	const rules = filterRules(getDefaultRules(), options.ignore);
-	const results = runRules(contents, rules);
-	const ruleNames = rules.map((r) => r.name);
-
-	const output = options.json
-		? formatJsonReport(results, contents)
-		: formatTextReport(results, contents, ruleNames);
-
-	process.stdout.write(`${output}\n`);
-
-	return getExitCode(results);
-}
-
-const program = new Command();
-
-program
-	.name("publishguard")
-	.description("Pre-publish tarball validator for npm packages")
-	.version(VERSION);
-
-program
-	.command("check")
-	.description("Validate an existing .tgz tarball")
-	.argument("<tarball>", "path to .tgz file")
-	.option("--json", "output as JSON")
-	.option("--ignore <rules>", "comma-separated rule names to skip")
-	.option("--max-size <kb>", "override size-limit threshold in KB")
-	.action(async (tarball: string, options: CliOptions) => {
-		try {
-			const exitCode = await runCheck(tarball, options);
-			process.exit(exitCode);
-		} catch (err) {
-			const message = err instanceof Error ? err.message : String(err);
-			process.stderr.write(`Error: ${message}\n`);
-			process.exit(2);
-		}
-	});
-
-// Default command — pack and validate
-program
-	.option("--json", "output as JSON")
-	.option("--ignore <rules>", "comma-separated rule names to skip")
-	.option("--max-size <kb>", "override size-limit threshold in KB")
-	.action(async (options: CliOptions) => {
-		let tgzPath: string | undefined;
-
+	if (tarballArg) {
+		tgzPath = tarballArg;
+	} else {
 		try {
 			tgzPath = await packProject(process.cwd());
+			cleanup = true;
 		} catch (err) {
-			const message = err instanceof Error ? err.message : String(err);
-			process.stderr.write(`Error running npm pack: ${message}\n`);
+			const msg = err instanceof Error ? err.message : String(err);
+			process.stderr.write(`Error running npm pack: ${msg}\n`);
 			process.exit(2);
 		}
+	}
 
-		try {
-			const exitCode = await runCheck(tgzPath, options);
+	try {
+		const { entries, name, version } = await readTarball(tgzPath);
+		const sourceMaps = findSourceMaps(entries);
 
-			// Clean up the generated tarball
+		if (jsonMode) {
+			const report = {
+				package: name,
+				version,
+				files: entries.length,
+				sourceMaps,
+				passed: sourceMaps.length === 0,
+			};
+			process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
+		} else {
+			process.stdout.write(`publishguard v${VERSION} — checking ${name}@${version}\n\n`);
+
+			if (sourceMaps.length === 0) {
+				process.stdout.write(`${pc.green(pc.bold("PASS"))} No source maps found.\n`);
+			} else {
+				process.stdout.write(
+					`${pc.red(pc.bold("FAIL"))} Found ${sourceMaps.length} source map file(s) exposing original source code:\n\n`,
+				);
+				for (const file of sourceMaps) {
+					process.stdout.write(`  ${pc.dim(file)}\n`);
+				}
+				process.stdout.write("\n");
+			}
+		}
+
+		if (cleanup) {
 			try {
 				await unlink(tgzPath);
 			} catch {
-				// Ignore cleanup errors
+				// ignore
 			}
+		}
 
-			process.exit(exitCode);
-		} catch (err) {
-			// Clean up on failure too
+		process.exit(sourceMaps.length > 0 ? 1 : 0);
+	} catch (err) {
+		if (cleanup) {
 			try {
 				await unlink(tgzPath);
 			} catch {
-				// Ignore cleanup errors
+				// ignore
 			}
-
-			const message = err instanceof Error ? err.message : String(err);
-			process.stderr.write(`Error: ${message}\n`);
-			process.exit(2);
 		}
-	});
+		const msg = err instanceof Error ? err.message : String(err);
+		process.stderr.write(`Error: ${msg}\n`);
+		process.exit(2);
+	}
+}
 
-program.parse();
+run();

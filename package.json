@@ -1,7 +1,7 @@
 {
 	"name": "publishguard",
 	"version": "0.1.0",
-	"description": "Pre-publish tarball validator for npm packages. Catches leaked secrets, bloat, and misconfigured exports before they hit the registry.",
+	"description": "Checks npm packages for source maps that expose original source code. One job, zero config, CI-ready.",
 	"type": "module",
 	"main": "./dist/index.js",
 	"types": "./dist/index.d.ts",
@@ -25,25 +25,13 @@
 		"typecheck": "tsc --noEmit",
 		"prepublishOnly": "npm run build"
 	},
-	"keywords": [
-		"npm",
-		"publish",
-		"guard",
-		"validator",
-		"tarball",
-		"security",
-		"secrets",
-		"lint",
-		"ci",
-		"pre-publish"
-	],
+	"keywords": ["npm", "sourcemap", "source-map", "security", "ci", "publish", "tarball"],
 	"author": "",
 	"license": "MIT",
 	"engines": {
 		"node": ">=20"
 	},
 	"dependencies": {
-		"commander": "^13.0.0",
 		"picocolors": "^1.1.0",
 		"tar": "^7.4.0"
 	},

@@ -1,35 +1,16 @@
-import type { TarballContents } from "../core/tarball.js";
-import type { Rule, RuleResult } from "./types.js";
+import type { TarballEntry } from "../core/tarball.js";
 
 const SOURCEMAP_EXTENSIONS = [".js.map", ".css.map", ".mjs.map", ".cjs.map"];
 
-export const rule: Rule = {
-	name: "no-exposed-source",
-	description: "Flag source map files that expose original source code",
-	defaultSeverity: "error",
-	run(contents: TarballContents): RuleResult[] {
-		const flagged: string[] = [];
-
-		for (const entry of contents.entries) {
-			for (const ext of SOURCEMAP_EXTENSIONS) {
-				if (entry.path.endsWith(ext)) {
-					flagged.push(entry.path);
-					break;
-				}
+export function findSourceMaps(entries: TarballEntry[]): string[] {
+	const found: string[] = [];
+	for (const entry of entries) {
+		for (const ext of SOURCEMAP_EXTENSIONS) {
+			if (entry.path.endsWith(ext)) {
+				found.push(entry.path);
+				break;
 			}
 		}
-
-		if (flagged.length === 0) return [];
-
-		return [
-			{
-				rule: this.name,
-				severity: this.defaultSeverity,
-				message: `Found ${flagged.length} source map file(s) that expose original source code`,
-				files: flagged,
-			},
-		];
-	},
-};
-
-export default rule;
+	}
+	return found;
+}

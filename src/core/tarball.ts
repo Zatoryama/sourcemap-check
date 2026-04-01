@@ -4,14 +4,6 @@ import * as tar from "tar";
 export interface TarballEntry {
 	path: string;
 	size: number;
-	content: Buffer;
-}
-
-export interface TarballContents {
-	entries: TarballEntry[];
-	manifest: Record<string, unknown>;
-	totalSize: number;
-	filePath: string;
 }
 
 const PACKAGE_PREFIX = "package/";
@@ -23,61 +15,56 @@ function stripPackagePrefix(entryPath: string): string {
 	return entryPath;
 }
 
-function collectStream(stream: tar.ReadEntry): Promise<Buffer> {
-	return new Promise<Buffer>((res, rej) => {
-		const chunks: Buffer[] = [];
-		stream.on("data", (chunk: Buffer) => chunks.push(chunk));
-		stream.on("end", () => res(Buffer.concat(chunks)));
-		stream.on("error", rej);
-	});
-}
-
-export async function readTarball(tgzPath: string): Promise<TarballContents> {
+export async function readTarball(
+	tgzPath: string,
+): Promise<{ entries: TarballEntry[]; name: string; version: string }> {
 	const absolutePath = resolve(tgzPath);
 	const entries: TarballEntry[] = [];
-	const entryPromises: Promise<void>[] = [];
+	let manifestBuffer: Buffer | undefined;
+
+	const bufferPromises: Promise<void>[] = [];
 
 	await tar.list({
 		file: absolutePath,
 		onReadEntry(entry) {
-			// Skip directories — only collect files
 			if (entry.type !== "File") {
 				entry.resume();
 				return;
 			}
 
-			const promise = collectStream(entry).then((content) => {
-				entries.push({
-					path: stripPackagePrefix(entry.path),
-					size: content.length,
-					content,
-				});
-			});
+			const filePath = stripPackagePrefix(entry.path);
 
-			entryPromises.push(promise);
+			if (filePath === "package.json") {
+				const chunks: Buffer[] = [];
+				const p = new Promise<void>((res, rej) => {
+					entry.on("data", (chunk: Buffer) => chunks.push(chunk));
+					entry.on("end", () => {
+						manifestBuffer = Buffer.concat(chunks);
+						res();
+					});
+					entry.on("error", rej);
+				});
+				bufferPromises.push(p);
+			} else {
+				entries.push({ path: filePath, size: entry.size ?? 0 });
+				entry.resume();
+			}
 		},
 	});
 
-	await Promise.all(entryPromises);
+	await Promise.all(bufferPromises);
 
-	const manifestEntry = entries.find((e) => e.path === "package.json");
-	if (!manifestEntry) {
-		throw new Error(`No package.json found in tarball: ${absolutePath}`);
+	let name = "unknown";
+	let version = "0.0.0";
+	if (manifestBuffer) {
+		try {
+			const manifest = JSON.parse(manifestBuffer.toString("utf-8"));
+			name = manifest.name ?? "unknown";
+			version = manifest.version ?? "0.0.0";
+		} catch {
+			// ignore parse errors
+		}
 	}
 
-	let manifest: Record<string, unknown>;
-	try {
-		manifest = JSON.parse(manifestEntry.content.toString("utf-8")) as Record<string, unknown>;
-	} catch {
-		throw new Error("Failed to parse package.json from tarball");
-	}
-
-	const totalSize = entries.reduce((sum, e) => sum + e.size, 0);
-
-	return {
-		entries,
-		manifest,
-		totalSize,
-		filePath: absolutePath,
-	};
+	return { entries, name, version };
 }
