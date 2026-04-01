@@ -1,13 +1,13 @@
 import { afterAll, describe, expect, it } from "vitest";
 import { readTarball } from "../../src/core/tarball.js";
-import { rule } from "../../src/rules/no-sourcemaps.js";
+import { rule } from "../../src/rules/no-exposed-source.js";
 import { cleanupFixtures, createFixtureTarball } from "../helpers.js";
 
 afterAll(() => {
 	cleanupFixtures();
 });
 
-describe("no-sourcemaps rule", () => {
+describe("no-exposed-source rule", () => {
 	it("flags .js.map files", async () => {
 		const tgz = await createFixtureTarball([
 			{ path: "dist/index.js.map", content: '{"version":3}' },
@@ -46,7 +46,7 @@ describe("no-sourcemaps rule", () => {
 		const results = rule.run(contents);
 
 		expect(results).toHaveLength(1);
-		expect(results[0].severity).toBe("warn");
+		expect(results[0].severity).toBe("error");
 	});
 
 	it("flags multiple sourcemap files in a single result", async () => {

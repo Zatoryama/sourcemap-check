@@ -53,7 +53,7 @@ describe("engine", () => {
 
 			const ruleNames = [...new Set(results.map((r) => r.rule))];
 			expect(ruleNames).toContain("no-secrets");
-			expect(ruleNames).toContain("no-sourcemaps");
+			expect(ruleNames).toContain("no-exposed-source");
 			expect(ruleNames).toContain("no-config");
 		});
 	});

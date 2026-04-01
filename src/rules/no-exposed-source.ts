@@ -4,9 +4,9 @@ import type { Rule, RuleResult } from "./types.js";
 const SOURCEMAP_EXTENSIONS = [".js.map", ".css.map", ".mjs.map", ".cjs.map"];
 
 export const rule: Rule = {
-	name: "no-sourcemaps",
-	description: "Flag source map files that bloat the package",
-	defaultSeverity: "warn",
+	name: "no-exposed-source",
+	description: "Flag source map files that expose original source code",
+	defaultSeverity: "error",
 	run(contents: TarballContents): RuleResult[] {
 		const flagged: string[] = [];
 
@@ -25,7 +25,7 @@ export const rule: Rule = {
 			{
 				rule: this.name,
 				severity: this.defaultSeverity,
-				message: `Found ${flagged.length} source map file(s)`,
+				message: `Found ${flagged.length} source map file(s) that expose original source code`,
 				files: flagged,
 			},
 		];

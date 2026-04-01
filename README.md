@@ -20,8 +20,8 @@ publishguard v0.1.0 — checking my-package@1.0.0
          src/config/defaults.json
          dist/config/defaults.json
 
- WARN  no-sourcemaps (2 files)
-       Found 2 source map file(s)
+ FAIL  no-exposed-source (2 files)
+       Found 2 source map file(s) that expose original source code
        dist/index.js.map
        dist/utils.js.map
 
@@ -31,7 +31,7 @@ publishguard v0.1.0 — checking my-package@1.0.0
  PASS  size-limit
  PASS  required-files
 
-1 error, 2 warnings — FAILED
+2 errors, 1 warning — FAILED
 ```
 
 ## Why
@@ -104,7 +104,7 @@ Returns structured JSON for programmatic consumption:
 ### Skip specific rules
 
 ```bash
-publishguard --ignore no-sourcemaps,no-docs
+publishguard --ignore no-exposed-source,no-docs
 ```
 
 ### Custom size limit
@@ -133,11 +133,11 @@ Flags files that may contain secrets or credentials:
 - **By content**: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `-----BEGIN PRIVATE KEY-----`, GitHub PATs (`ghp_*`), npm tokens (`npm_*`), OpenAI keys (`sk-*`)
 - **Safe**: `.env.example`, `.env.sample`, `.env.template` are excluded
 
-### `no-sourcemaps` (warn)
+### `no-exposed-source` (error)
 
-Flags source map files: `*.js.map`, `*.css.map`, `*.mjs.map`, `*.cjs.map`
+Flags source map files that expose your original source code: `*.js.map`, `*.css.map`, `*.mjs.map`, `*.cjs.map`
 
-Source maps expose your original source code and add significant size. Most packages don't need to ship them.
+Source maps contain mappings back to your original source — variable names, comments, file structure, and often the full source text via `sourcesContent`. Shipping them in an npm package gives anyone who installs it access to your unminified code.
 
 ### `no-tests` (warn)
 
