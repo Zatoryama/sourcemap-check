@@ -1,9 +1,9 @@
-# publishguard
+# sourcemap-check
 
 Checks npm packages for source maps that expose your original source code. One job, zero config, CI-ready.
 
 ```
-publishguard v0.1.0 — checking my-package@1.0.0
+sourcemap-check v0.1.0 — checking my-package@1.0.0
 
 FAIL Found 3 source map file(s) exposing original source code:
 
@@ -16,25 +16,25 @@ FAIL Found 3 source map file(s) exposing original source code:
 
 Source maps (`.js.map`, `.css.map`) contain mappings back to your original source code — variable names, comments, file structure, and often the full source text via `sourcesContent`. When you publish an npm package with source maps, anyone who installs it gets access to your unminified code.
 
-No existing npm publishing tool checks for this. `publint` validates exports. `arethetypeswrong` checks types. `gitleaks` catches secrets. **Nobody catches source maps.** publishguard fills that gap.
+No existing npm publishing tool checks for this. `publint` validates exports. `arethetypeswrong` checks types. `gitleaks` catches secrets. **Nobody catches source maps.** sourcemap-check fills that gap.
 
 ## Install
 
 ```bash
-npm install -D publishguard
+npm install -D sourcemap-check
 ```
 
 ## Usage
 
 ```bash
 # Check current project (runs npm pack, inspects, cleans up)
-npx publishguard
+npx sourcemap-check
 
 # Check an existing tarball
-npx publishguard ./my-package-1.0.0.tgz
+npx sourcemap-check ./my-package-1.0.0.tgz
 
 # JSON output for CI
-npx publishguard --json
+npx sourcemap-check --json
 ```
 
 ## Exit codes
@@ -52,7 +52,7 @@ npx publishguard --json
 ```json
 {
   "scripts": {
-    "prepublishOnly": "publishguard"
+    "prepublishOnly": "sourcemap-check"
   }
 }
 ```
@@ -61,13 +61,13 @@ npx publishguard --json
 
 ```yaml
 - name: Check for source maps
-  run: npx publishguard
+  run: npx sourcemap-check
 ```
 
 ### JSON output
 
 ```bash
-npx publishguard --json
+npx sourcemap-check --json
 ```
 
 ```json
@@ -86,7 +86,7 @@ npx publishguard --json
 ## Programmatic API
 
 ```typescript
-import { readTarball, findSourceMaps, packProject } from "publishguard";
+import { readTarball, findSourceMaps, packProject } from "sourcemap-check";
 
 const tgzPath = await packProject(process.cwd());
 const { entries } = await readTarball(tgzPath);

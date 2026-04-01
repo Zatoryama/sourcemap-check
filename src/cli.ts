@@ -42,7 +42,7 @@ async function run(): Promise<void> {
 			};
 			process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
 		} else {
-			process.stdout.write(`publishguard v${VERSION} — checking ${name}@${version}\n\n`);
+			process.stdout.write(`sourcemap-check v${VERSION} — checking ${name}@${version}\n\n`);
 
 			if (sourceMaps.length === 0) {
 				process.stdout.write(`${pc.green(pc.bold("PASS"))} No source maps found.\n`);
